@@ -12,60 +12,60 @@ PRINT MACRO STR
     INT 21H
 PRINT ENDM
 
-PRINT_NUM MACRO NUM
-    MOV AL, NUM
-    ADD AL, 30H
-    MOV DL, AL
-    MOV AH, 2
-    INT 21H
-PRINT_NUM ENDM
-
 .MODEL SMALL
 .STACK 100H
 
 .DATA
-    MSG1 DB "Enter a single digit number: $"
-    MSG2 DB "Result: $"
+    PROMPT_MSG DB "Enter a number: $"
+    DIV5_MSG DB "The number is divisible by 5.$"
+    NOT_DIV5_MSG DB "The number is not divisible by 5.$"
+    DIV10_MSG DB "The number is also divisible by 10.$"
+    NOT_DIV10_MSG DB "The number is not divisible by 10.$"
     NUM DB ?
-    RESULT DB ?
 .CODE 
 MAIN PROC
     MOV AX, @DATA
     MOV DS, AX
 
-    ; Prompt user for a number
-    PRINT MSG1
+    PRINT PROMPT_MSG
     NEWLINE
 
-    ; Get number from user
     MOV AH, 1
     INT 21H
     SUB AL, 30H
     MOV NUM, AL
 
-    ; Check if the number is below 5
-    CMP NUM, 5
-    JGE NO_MULTIPLY
-
-    ; If below 5, multiply by 2
     MOV AL, NUM
-    MOV BL, 2
-    MUL BL
-    MOV RESULT, AL
-    JMP DISPLAY_RESULT
+    MOV AH, 0
+    MOV BL, 5
+    DIV BL
+    CMP AH, 0
+    JNE NOT_DIVISIBLE_BY_5
 
-NO_MULTIPLY:
-    MOV AL, NUM
-    MOV RESULT, AL
-
-DISPLAY_RESULT:
-    ; Print result
-    PRINT MSG2
-    NEWLINE
-    PRINT_NUM RESULT
+    PRINT DIV5_MSG
     NEWLINE
 
-    ; Terminate program
+    MOV AL, NUM
+    MOV AH, 0
+    MOV BL, 10
+    DIV BL
+    CMP AH, 0
+    JNE NOT_DIVISIBLE_BY_10
+
+    PRINT DIV10_MSG
+    NEWLINE
+    JMP END_PROGRAM
+
+NOT_DIVISIBLE_BY_10:
+    PRINT NOT_DIV10_MSG
+    NEWLINE
+    JMP END_PROGRAM
+
+NOT_DIVISIBLE_BY_5:
+    PRINT NOT_DIV5_MSG
+    NEWLINE
+
+END_PROGRAM:
     MOV AH, 4CH
     INT 21H
 
